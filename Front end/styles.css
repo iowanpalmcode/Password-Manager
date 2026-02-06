@@ -96,7 +96,7 @@ header{
 .searchInput{
     padding: 15px;
     border: none;
-    background-color:rgb(207, 206, 206);
+    background-color:rgb(194, 194, 194);
     font-size: 1.1em;
 }
 .searchInput:focus{
@@ -104,3 +104,20 @@ header{
     outline: none;
 }
 
+.helpDesc{
+    background-color: gray;
+    padding: 2px;
+    border-radius: 15px;
+    width: 100px;
+    position: fixed;
+    right: 15px;
+    padding: 5px;
+    top: 70px;
+}
+
+.formToAddPassword{
+    width: 50vw;
+    height: 50vh;
+    background-color: rgb(69, 69, 69);
+    position: fixed;
+}
