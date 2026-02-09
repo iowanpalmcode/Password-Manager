@@ -6,9 +6,19 @@ body{
     font-family: "courier new", monospace
 }
 
+button{
+    padding: 15px 30px;
+    border: none;
+    font-size: 1.2em;
+    background-color: rgb(220, 16, 16);
+    border-radius: 15px;
+    max-width: 250px;
+    cursor: pointer;
+}
+
 header{
-    background-color: rgb(202, 26, 26);
-    height: 110px;
+    background-color: rgb(192, 23, 23);
+    height: 90px;
     width: 100vw;
     display: flex;
     justify-content: space-between;
@@ -30,7 +40,6 @@ header{
     margin: 25px;
     font-weight: 1000;
     font-size: 2.7em;
-    margin-left: 155px;
 }
 .help{
     height: 25px;
@@ -50,6 +59,11 @@ header{
 
 
 /* username/password containers*/
+.boxes{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
 .box{
     border: 2px solid black;
     color: rgb(59, 59, 59);
@@ -59,8 +73,7 @@ header{
     text-align: center;
     width: 450px;
     justify-self: center;
-    margin-top: 25px;
-    margin-left: -25px;
+    margin: 15px;
 }
 
 .boxMenu{
@@ -68,6 +81,8 @@ header{
     left: 90%;
     bottom: 15px;
     padding: 6px;
+    height: 25px;
+    width: 25px;
 }
 .boxMenu:hover{
     cursor: pointer;
@@ -78,6 +93,7 @@ header{
     display: flex;
     justify-content: space-evenly;
     align-content: center;
+    flex-direction: column;
 }
 
 .boxp{
@@ -88,16 +104,20 @@ header{
 .boxTitle{
     font-size: 2em;
 }
+.searchCont{
+    text-align: center;
+}
 
 .searchTitle{
     font-size: 2.3em;
-    margin-left: 25px;
 }
 .searchInput{
     padding: 15px;
     border: none;
     background-color:rgb(194, 194, 194);
     font-size: 1.1em;
+    width: 150px;
+    margin-bottom: 35px;
 }
 .searchInput:focus{
     background-color: rgb(156, 155, 155);
@@ -105,7 +125,7 @@ header{
 }
 
 .helpDesc{
-    background-color: gray;
+    background-color: rgba(128, 128, 128, 0.703);
     padding: 2px;
     border-radius: 15px;
     width: 100px;
@@ -116,8 +136,46 @@ header{
 }
 
 .formToAddPassword{
-    width: 50vw;
-    height: 50vh;
-    background-color: rgb(69, 69, 69);
     position: fixed;
+    display: flex;
+    justify-self: center;    
+    bottom: 15%;
+    width: 75vw;
+    height: 75vh;
+    background-color: rgb(255, 255, 255);
+    border: 5px solid gray;
+    border-radius: 15px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.formToAddPassword input{
+    display: flex;
+    height: 30px;
+    margin-bottom: 14px;
+    margin-left: 5px;
+    border: none;
+    background-color: rgb(255, 255, 255);
+    margin-top: 15px;
+    width: 50%;
+    align-self: center;
+    color: rgb(0, 0, 0);
+    font-size: 1.3em;
+}
+
+
+input:focus{
+    outline: none;
+}
+
+#formcom{
+    display: flex;
+    justify-content: center;
+}
+
+.errorAddingPassword {
+    background-color: rgb(234, 92, 92);
+    border: 3px solid red;
+    border-radius: 5px;
+    padding: 10px;
 }

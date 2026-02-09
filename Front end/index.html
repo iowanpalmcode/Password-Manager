@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h2 class="addPassword">Add Password</h2>
+        <h2 onclick="formToggle()"class="addPassword">Add Password</h2>
         <h1 class="title">Password Manager</h1>
         <div class="help">?</div>
     </header>
@@ -19,32 +19,20 @@
                 <h2 class="searchTitle">Search</h2>
                 <input class="searchInput" placeholder="Search Passwords">
             </div>
+            <p class="noPasswordsError"style="text-align: center; margin-left: 20vw; margin-right: 20vw; font-size: 1.5em;">You currently have no passwords, Click "add passwords" in the top left corner to add a password </p>
             <div class="boxes">
-                <div class="box">
-                    <h2 class="boxTitle">Google.com</h2>
-                    <p class="boxp">Password: </p>
-                    <p class="boxp">Username: </p>
-                    <img class="boxMenu"src="./src/menu-vertical-svgrepo-com (1).svg" width="25px" height="25px">
-                </div>
-                <div class="box">
-                    <h2 class="boxTitle">Google.com</h2>
-                    <p class="boxp">Password: </p>
-                    <p class="boxp">Username: </p>
-                    <img class="boxMenu"src="./src/menu-vertical-svgrepo-com (1).svg" width="25px" height="25px">
-                </div>
-                <div class="box">
-                    <h2 class="boxTitle">Google.com</h2>
-                    <p class="boxp">Password: </p>
-                    <p class="boxp">Username: </p>
-                    <img class="boxMenu"src="./src/menu-vertical-svgrepo-com (1).svg" width="25px"height="25px">
-                </div>
             </div>
         </div>
 
 
 
-        <div class="formToAddPassword">
-            <h1>yope</h1>
+        <div style="display: none;"class="formToAddPassword">
+            <div onclick="formToggle()" class="X" style="top: 80px;cursor: pointer; position: fixed; right: 15vw; font-size: 3em;font-family: arial;">X</div>
+            <div id="formcom" class="formTitle"><p style="font-size: 2em;"><b>Title: </b></p><input class="titlef" placeholder="Add Title"></div>
+            <div id="formcom" class="formUsername"><p style="font-size: 2em;"><b>Username: </b></p><input class="usernamef" placeholder="Add Username"></div>
+            <div id="formcom" class="formPassword"><p style="font-size: 2em;"><b>Password: </b></p><input class="passwordf" placeholder="Add Password"></div>
+            <button onclick="addPasswordSubmit()">Add Password</button>
+            <p class="errorAddingPassword"style="display: none;">Error adding password</p>
         </div>
     </main>
     <footer>
