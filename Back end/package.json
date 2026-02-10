@@ -1,0 +1,20 @@
+{
+  "name": "password-manager-backend",
+  "version": "1.0.0",
+  "description": "an app to manage credentials",
+  "license": "MIT",
+  "author": "Joseph Rotramel",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
