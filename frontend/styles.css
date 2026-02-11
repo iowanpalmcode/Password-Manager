@@ -127,6 +127,28 @@ body{
     padding: 50px;
 }
 
+/* Welcome animations */
+.welcome-box { position: relative; overflow: hidden; }
+.welcome-box h1 { animation: pop 1200ms ease both; }
+.welcome-box .welcome-anim { position: absolute; left: 50%; transform: translateX(-50%); bottom: -10px; pointer-events: none; display:flex; gap:18px }
+.float-icon { display:inline-block; font-size:28px; opacity:0.95; transform-origin: center; animation: floatUp 3500ms ease-in-out infinite; }
+.float-icon:nth-child(2) { animation-delay: 600ms; }
+.float-icon:nth-child(3) { animation-delay: 1200ms; }
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(0.95); opacity:0 }
+    10% { opacity: 1 }
+    50% { transform: translateY(-70px) rotate(-6deg) scale(1.05) }
+    90% { opacity: 0.6 }
+    100% { transform: translateY(-140px) rotate(6deg) scale(0.95); opacity: 0 }
+}
+
+@keyframes pop {
+    0% { transform: scale(0.9); opacity: 0 }
+    60% { transform: scale(1.05); opacity: 1 }
+    100% { transform: scale(1); opacity: 1 }
+}
+
 .welcome-box h1 {
     font-size: 3.5em;
     margin-bottom: 20px;

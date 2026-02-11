@@ -693,21 +693,34 @@ function calculatePasswordStrength(pw) {
 // ========== Settings Screen ==========
 function updateSettingsScreen() {
     if (!currentUser) return
-
     document.getElementById("settingsUsername").textContent = currentUser.username
     document.getElementById("settingsEmail").textContent = currentUser.email
     document.getElementById("settingsMemberSince").textContent = new Date().toLocaleDateString()
 
-    // List user's banks
+    // Fetch banks from API so Settings reflects the same banks shown on main screen
     const banksList = document.getElementById("userBanksList")
-    banksList.innerHTML = ""
-    if (currentUser.banks && currentUser.banks.length > 0) {
-        currentUser.banks.forEach(membership => {
-            const bankDiv = document.createElement("div")
-            bankDiv.style.padding = "10px 0"
-            bankDiv.innerHTML = `<span>• ${membership.bankId.name}</span>`
-            banksList.appendChild(bankDiv)
-        })
+    banksList.innerHTML = "Loading..."
+    try {
+        const resp = await fetch(`${API_BASE}/banks`, { headers: { 'Authorization': `Bearer ${authToken}` } })
+        if (!resp.ok) {
+            banksList.innerHTML = '<div style="color:rgb(150,150,150)">No banks available</div>'
+            return
+        }
+        const data = await resp.json()
+        banksList.innerHTML = ''
+        if (data.banks && data.banks.length > 0) {
+            data.banks.forEach(bank => {
+                const bankDiv = document.createElement('div')
+                bankDiv.style.padding = '8px 0'
+                bankDiv.innerHTML = `• ${bank.name}`
+                banksList.appendChild(bankDiv)
+            })
+        } else {
+            banksList.innerHTML = '<div style="color:rgb(150,150,150)">No banks yet</div>'
+        }
+    } catch (err) {
+        console.error('Error loading banks for settings', err)
+        banksList.innerHTML = '<div style="color:rgb(150,150,150)">Unable to load banks</div>'
     }
 }
 
