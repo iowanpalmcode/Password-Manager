@@ -881,6 +881,21 @@ function hideThemeModal(){ const m = document.getElementById('themeModal'); if (
 // Theme picker logic
 const themes = ['default','dark','sunset','forest','rose','ocean','midnight','gold','mint','berry','steel','slate']
 let selectedTheme = 'default'
+// Map of theme variable values for immediate application
+const themeDefinitions = {
+    default: { '--bg': '#ffffff', '--accent': '#1976d2', '--text': '#111' },
+    dark: { '--bg': '#0f1720', '--accent': '#6ee7b7', '--text': '#e6eef6' },
+    sunset: { '--bg': '#fff7ed', '--accent': '#f97316', '--text': '#3b2f2f' },
+    forest: { '--bg': '#eafaf1', '--accent': '#059669', '--text': '#05361a' },
+    rose: { '--bg': '#fff1f2', '--accent': '#fb7185', '--text': '#3b1323' },
+    ocean: { '--bg': '#f0f9ff', '--accent': '#0ea5e9', '--text': '#022f40' },
+    midnight: { '--bg': '#071329', '--accent': '#7c3aed', '--text': '#e6f0ff' },
+    gold: { '--bg': '#fffaf0', '--accent': '#b45309', '--text': '#2b1600' },
+    mint: { '--bg': '#fbfffd', '--accent': '#10b981', '--text': '#05361a' },
+    berry: { '--bg': '#fff5fb', '--accent': '#a21caf', '--text': '#2b0b2e' },
+    steel: { '--bg': '#f7f9fc', '--accent': '#475569', '--text': '#0f1720' },
+    slate: { '--bg': '#f8fafc', '--accent': '#334155', '--text': '#0f1720' }
+}
 function buildThemeGrid(){
     const grid = document.getElementById('themeGrid'); if (!grid) return
     grid.innerHTML = ''
@@ -888,18 +903,50 @@ function buildThemeGrid(){
         const btn = document.createElement('button')
         btn.type = 'button'
         btn.className = 'theme-tile theme-'+t
-        btn.textContent = t.charAt(0).toUpperCase() + t.slice(1)
-        btn.onclick = ()=>{ document.querySelectorAll('.theme-tile').forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); selectedTheme = t; applyTheme(t) }
-        if (t===selectedTheme) btn.classList.add('selected')
+        btn.setAttribute('data-theme', t)
+        btn.setAttribute('aria-pressed', 'false')
+        // label
+        const label = document.createElement('div')
+        label.textContent = t.charAt(0).toUpperCase() + t.slice(1)
+        btn.appendChild(label)
+        // checkmark indicator
+        const check = document.createElement('span')
+        check.className = 'theme-check'
+        check.style.position = 'absolute'
+        check.style.right = '8px'
+        check.style.top = '8px'
+        check.style.display = 'none'
+        check.textContent = '✓'
+        btn.appendChild(check)
+
+        btn.onclick = ()=>{
+            // update UI selection
+            document.querySelectorAll('.theme-tile').forEach(x=>{
+                x.classList.remove('selected')
+                x.setAttribute('aria-pressed','false')
+                const c = x.querySelector('.theme-check'); if(c) c.style.display = 'none'
+            })
+            btn.classList.add('selected')
+            btn.setAttribute('aria-pressed','true')
+            check.style.display = 'block'
+            selectedTheme = t
+            applyTheme(t)
+        }
+        if (t===selectedTheme) { btn.classList.add('selected'); btn.setAttribute('aria-pressed','true'); check.style.display = 'block' }
         grid.appendChild(btn)
     })
 }
 
 function applyTheme(themeName){
+    // apply CSS variables immediately for stronger visual effect
     try{
+        const defs = themeDefinitions[themeName] || themeDefinitions.default
+        const root = document.documentElement
+        Object.keys(defs).forEach(k => root.style.setProperty(k, defs[k]))
+        // also set a body class for any CSS rules targeting theme-<name>
         document.body.classList.remove(...themes.map(t=>'theme-'+t))
         document.body.classList.add('theme-'+themeName)
-    }catch(e){}
+    }catch(e){ console.error('applyTheme error', e) }
 }
 
 // save theme button handler is attached after DOMContentLoaded so the element exists

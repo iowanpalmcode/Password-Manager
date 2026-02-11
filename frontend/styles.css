@@ -269,11 +269,10 @@ header.active {
 .form-btn-cancel { background:#eee; }
 
 /* Theme preview tiles */
-.theme-tile { height:64px; border-radius:8px; cursor:pointer; border:2px solid transparent; display:flex; align-items:center; justify-content:center; color:var(--text, #111); font-weight:700; }
-.theme-tile.selected { outline:3px solid rgba(25,118,210,0.25); }
-
-/* Ensure theme tiles behave as buttons */
-.theme-tile { background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(0,0,0,0.02)); padding:6px 8px; appearance:none; border:none; }
+.theme-tile { height:64px; border-radius:8px; cursor:pointer; border:2px solid transparent; display:flex; align-items:center; justify-content:center; color:var(--text, #111); font-weight:700; position:relative; background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(0,0,0,0.02)); padding:6px 8px; appearance:none; }
+.theme-tile.selected { outline:3px solid rgba(25,118,210,0.25); transform: scale(1.03); }
+.theme-tile:focus { outline: 3px solid rgba(25,118,210,0.2); }
+.theme-check { font-weight: 800; color: var(--accent, #1976d2); position:absolute; right:8px; top:8px; display:none }
 .theme-tile:focus { outline: 3px solid rgba(25,118,210,0.2); }
 
 /* Example theme classes (presets) */
