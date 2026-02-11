@@ -67,6 +67,13 @@ function setupEventListeners() {
     const addRoleForm = document.getElementById("addRoleForm")
     if (addRoleForm) addRoleForm.addEventListener("submit", handleAddRole)
 
+    // Account settings form
+    const accountSettingsForm = document.getElementById('accountSettingsForm')
+    if (accountSettingsForm) accountSettingsForm.addEventListener('submit', handleSaveAccountSettings)
+
+    const changePasswordForm = document.getElementById('changePasswordForm')
+    if (changePasswordForm) changePasswordForm.addEventListener('submit', handleChangePassword)
+
     // Password show toggle
     const pwdToggle = document.getElementById("passwordShowToggle")
     if (pwdToggle) pwdToggle.addEventListener("change", (e) => {
@@ -81,6 +88,43 @@ function setupEventListeners() {
         if (!el) return
         updatePasswordStrengthUI(val)
     })
+}
+
+async function handleSaveAccountSettings(e) {
+    e.preventDefault()
+    const username = document.getElementById('settingsUsernameInput').value
+    const email = document.getElementById('settingsEmailInput').value
+
+    try {
+        const resp = await fetch(`${API_BASE}/auth/me`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ username, email })
+        })
+        const payload = await resp.json()
+        if (!resp.ok) return alert(payload.message || 'Failed to update profile')
+        alert('Profile updated')
+        await loadCurrentUser()
+    } catch (err) { console.error('Error saving account settings', err); alert('Error saving account settings') }
+}
+
+async function handleChangePassword(e) {
+    e.preventDefault()
+    const currentPassword = document.getElementById('settingsCurrentPassword').value
+    const newPassword = document.getElementById('settingsNewPassword').value
+    const newPasswordConfirm = document.getElementById('settingsNewPasswordConfirm').value
+
+    try {
+        const resp = await fetch(`${API_BASE}/auth/me/password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ currentPassword, newPassword, newPasswordConfirm })
+        })
+        const payload = await resp.json()
+        if (!resp.ok) return alert(payload.message || 'Failed to change password')
+        alert('Password changed')
+        document.getElementById('changePasswordForm').reset()
+    } catch (err) { console.error('Error changing password', err); alert('Error changing password') }
 }
 
 // ========== Authentication ==========

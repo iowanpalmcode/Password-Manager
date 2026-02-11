@@ -215,6 +215,45 @@
                 <span class="settings-label">Member Since</span>
                 <span class="settings-value" id="settingsMemberSince"></span>
             </div>
+            <div style="margin-top:18px;">
+                <form id="accountSettingsForm">
+                    <div class="form-group">
+                        <label for="settingsUsernameInput">Username</label>
+                        <input type="text" id="settingsUsernameInput">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingsEmailInput">Email</label>
+                        <input type="email" id="settingsEmailInput">
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="settingsThemeToggle"> Dark theme (placeholder)</label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="form-btn form-btn-submit">Save Account</button>
+                        <button type="button" class="form-btn form-btn-cancel" onclick="loadCurrentUser()">Reset</button>
+                    </div>
+                </form>
+
+                <hr style="margin:18px 0">
+
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label for="settingsCurrentPassword">Current Password</label>
+                        <input type="password" id="settingsCurrentPassword">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingsNewPassword">New Password</label>
+                        <input type="password" id="settingsNewPassword">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingsNewPasswordConfirm">Confirm New Password</label>
+                        <input type="password" id="settingsNewPasswordConfirm">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="form-btn form-btn-submit">Change Password</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="settings-section">
@@ -223,7 +262,7 @@
         </div>
         <div class="settings-section">
             <h3>About</h3>
-            <p class="info-text">Made by Felix and Joseph in about a week.</p>
+            <p class="info-text">Made by Felix and Joseph in about a week. Javascript, HTML, and CSS; 1 week project given to us by oru IT Teacher, Mr.Carter.</p>
         </div>
     </div>
 
