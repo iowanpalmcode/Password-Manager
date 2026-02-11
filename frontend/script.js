@@ -691,7 +691,7 @@ function calculatePasswordStrength(pw) {
 }
 
 // ========== Settings Screen ==========
-function updateSettingsScreen() {
+async function updateSettingsScreen() {
     if (!currentUser) return
     document.getElementById("settingsUsername").textContent = currentUser.username
     document.getElementById("settingsEmail").textContent = currentUser.email
