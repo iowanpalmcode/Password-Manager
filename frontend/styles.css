@@ -985,6 +985,11 @@ header.active {
     margin-bottom: 20px;
 .strength-meter { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03); }
 .strength-bar { transition: width 200ms ease, background 200ms ease; }
+
+/* Reduce extra spacing around the show-password checkbox and keep controls compact */
+#passwordShowToggle { width: 16px; height: 16px; margin: 0 6px 0 0; vertical-align: middle; }
+.form-group-password > div { display: flex; align-items: center; gap: 8px; }
+.form-group-password .strength-meter { width: 120px; flex: 0 0 120px; }
 }
 
 .modal-close {

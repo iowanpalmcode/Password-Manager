@@ -841,6 +841,15 @@ function showAddRoleForm() {
     document.getElementById('permDelete').checked = true
     document.getElementById('permManageUsers').checked = false
     document.getElementById('permManageSettings').checked = false
+    resetRoleCategorySelections()
+}
+
+// populate view-all and categories defaults
+function resetRoleCategorySelections() {
+    const catEls = Array.from(document.querySelectorAll('.permCategory'))
+    catEls.forEach(c => c.checked = false)
+    const viewAll = document.getElementById('permViewAll')
+    if (viewAll) viewAll.checked = false
 }
 
 function hideAddRoleForm() {
@@ -855,8 +864,15 @@ async function handleAddRole(e) {
     if (!currentBank) return alert('Open a bank first')
     const roleId = document.getElementById('roleIdInput').value
     const name = document.getElementById('roleNameInput').value
+    const canViewAll = !!document.getElementById('permViewAll').checked
+    // gather selected categories
+    const catEls = Array.from(document.querySelectorAll('.permCategory'))
+    const selectedCats = catEls.filter(c => c.checked).map(c => c.value)
+
     const permissions = {
         canViewPasswords: !!document.getElementById('permView').checked,
+        canViewAll,
+        viewCategories: selectedCats,
         canAddPasswords: !!document.getElementById('permAdd').checked,
         canEditPasswords: !!document.getElementById('permEdit').checked,
         canDeletePasswords: !!document.getElementById('permDelete').checked,
@@ -892,6 +908,15 @@ function editRole(roleId) {
     document.getElementById('roleIdInput').value = role._id
     document.getElementById('roleNameInput').value = role.name
     document.getElementById('permView').checked = !!role.permissions.canViewPasswords
+    document.getElementById('permViewAll').checked = !!(role.permissions.canViewAll)
+    // populate category checkboxes
+    resetRoleCategorySelections()
+    if (Array.isArray(role.permissions.viewCategories)) {
+        role.permissions.viewCategories.forEach(cat => {
+            const el = document.querySelector(`.permCategory[value="${cat}"]`)
+            if (el) el.checked = true
+        })
+    }
     document.getElementById('permAdd').checked = !!role.permissions.canAddPasswords
     document.getElementById('permEdit').checked = !!role.permissions.canEditPasswords
     document.getElementById('permDelete').checked = !!role.permissions.canDeletePasswords
