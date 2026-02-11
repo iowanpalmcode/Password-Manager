@@ -9,6 +9,8 @@ let lastClearedPasswords = null
 let snackbarTimer = null
 // Roles cache for quick edit
 let rolesCache = {}
+// Passwords cache (avoid storing plaintext in DOM attributes)
+let passwordsCache = {}
 
 const API_BASE = "http://localhost:5500/api"
 
@@ -23,6 +25,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Set up event listeners
     setupEventListeners()
+    // Initialize theme grid and apply saved theme
+    try { if (typeof buildThemeGrid === 'function') buildThemeGrid() } catch(e){}
+    try { fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${authToken}` } }).then(r=>r.json()).then(u=>{ if(u && u.user && u.user.theme) applyTheme(u.user.theme) }).catch(()=>{}) } catch(e){}
+    // attach save theme handler
+    const saveThemeBtn = document.getElementById('saveThemeBtn')
+    if (saveThemeBtn) saveThemeBtn.addEventListener('click', async ()=>{
+        try {
+            const resp = await fetch(`${API_BASE}/auth/me`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` }, body: JSON.stringify({ theme: selectedTheme }) })
+            if (resp.ok) { hideThemeModal(); showSnackbar('Theme saved') } else { showSnackbar('Failed to save theme') }
+        } catch (err) { console.error(err); showSnackbar('Failed to save theme') }
+    })
 })
 
 function setupEventListeners() {
@@ -349,25 +362,55 @@ async function loadBanks() {
                 const card = document.createElement("div")
                 card.className = "bank-card"
                 card.onclick = () => openBank(bank._id, bank)
-                card.innerHTML = `
-                    <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
-                        <div style="display:flex; gap:12px; align-items:center;">
-                            <div class="bank-icon">${bank.icon || "🏦"}</div>
-                            <div>
-                                <h3>${bank.name}</h3>
-                                <p style="margin:0;">${bank.description || "No description"}</p>
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <div class="bank-members">${bank.members.length} member(s)</div>
-                            <button class="small-btn" onclick="event.stopPropagation(); deleteBankPrompt('${bank._id}')">Delete</button>
-                        </div>
-                    </div>
-                `
+
+                const row = document.createElement('div')
+                row.style.display = 'flex'
+                row.style.alignItems = 'center'
+                row.style.justifyContent = 'space-between'
+                row.style.width = '100%'
+
+                const left = document.createElement('div')
+                left.style.display = 'flex'
+                left.style.gap = '12px'
+                left.style.alignItems = 'center'
+                const icon = document.createElement('div')
+                icon.className = 'bank-icon'
+                icon.textContent = bank.icon || '🏦'
+                const meta = document.createElement('div')
+                const title = document.createElement('h3')
+                title.textContent = bank.name || ''
+                const desc = document.createElement('p')
+                desc.style.margin = 0
+                desc.textContent = bank.description || 'No description'
+                meta.appendChild(title); meta.appendChild(desc)
+                left.appendChild(icon); left.appendChild(meta)
+
+                const right = document.createElement('div')
+                right.style.display = 'flex'
+                right.style.gap = '8px'
+                right.style.alignItems = 'center'
+                const members = document.createElement('div')
+                members.className = 'bank-members'
+                members.textContent = `${(bank.members && bank.members.length) || 0} member(s)`
+                const delBtn = document.createElement('button')
+                delBtn.className = 'small-btn'
+                delBtn.type = 'button'
+                delBtn.textContent = 'Delete'
+                delBtn.onclick = (e) => { e.stopPropagation(); deleteBankPrompt(bank._id) }
+                right.appendChild(members); right.appendChild(delBtn)
+
+                row.appendChild(left); row.appendChild(right)
+                card.appendChild(row)
                 grid.appendChild(card)
             })
         } else {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 50px; color: rgb(150,150,150);">No banks yet. Create one to get started!</p>'
+            const p = document.createElement('p')
+            p.style.gridColumn = '1/-1'
+            p.style.textAlign = 'center'
+            p.style.padding = '50px'
+            p.style.color = 'rgb(150,150,150)'
+            p.textContent = 'No banks yet. Create one to get started!'
+            grid.appendChild(p)
         }
     } catch (error) {
         console.error("Error loading banks:", error)
@@ -443,29 +486,76 @@ async function loadPasswords() {
 }
 
 function createPasswordBox(password) {
-    const box = document.createElement("div")
-    box.className = "box"
-    box.setAttribute('data-password-id', password._id)
-    box.setAttribute('data-username', password.username)
-    box.setAttribute('data-password', password.password)
-    box.setAttribute('data-title', password.title)
-    box.setAttribute('data-category', password.category || 'General')
-    box.setAttribute('data-notes', password.notes || '')
+    // store password in memory cache (keeps it out of attributes)
+    passwordsCache[password._id] = password.password || ''
 
-    box.innerHTML = `
-        <div class="box-header">
-            <h2 class="boxTitle">${password.title}</h2>
-            <img class="boxMenu" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='5' r='1'/%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='12' cy='19' r='1'/%3E%3C/svg%3E" onclick="toggleBoxMenu(event)">
-            <div class="box-menu-dropdown">
-                <div class="box-menu-item" onclick="editPassword('${password._id}')">Edit</div>
-                <div class="box-menu-item delete" onclick="deletePassword('${password._id}')">Delete</div>
-            </div>
-        </div>
-        <p class="boxp"><span class="boxp-label">Username:</span> ${password.username}</p>
-        <p class="boxp"><span class="boxp-label">Password:</span> <span class="masked">••••••••</span> <button class="small-btn" onclick="revealPassword('${password._id}', this)">Reveal</button></p>
-        <div class="box-category">${password.category || "General"}</div>
-        ${password.notes ? `<div class="box-notes">📝 ${password.notes}</div>` : ""}
-    `
+    const box = document.createElement('div')
+    box.className = 'box'
+    box.setAttribute('data-password-id', password._id)
+
+    // header
+    const header = document.createElement('div')
+    header.className = 'box-header'
+    const h2 = document.createElement('h2')
+    h2.className = 'boxTitle'
+    h2.textContent = password.title || ''
+    const menuImg = document.createElement('img')
+    menuImg.className = 'boxMenu'
+    menuImg.setAttribute('src', "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='5' r='1'/%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='12' cy='19' r='1'/%3E%3C/svg%3E")
+    menuImg.setAttribute('onclick', `toggleBoxMenu(event)`)
+
+    const menu = document.createElement('div')
+    menu.className = 'box-menu-dropdown'
+    const editItem = document.createElement('div')
+    editItem.className = 'box-menu-item'
+    editItem.textContent = 'Edit'
+    editItem.onclick = () => editPassword(password._id)
+    const delItem = document.createElement('div')
+    delItem.className = 'box-menu-item delete'
+    delItem.textContent = 'Delete'
+    delItem.onclick = () => deletePassword(password._id)
+    menu.appendChild(editItem); menu.appendChild(delItem)
+
+    header.appendChild(h2); header.appendChild(menuImg); header.appendChild(menu)
+    box.appendChild(header)
+
+    // username
+    const pUser = document.createElement('p')
+    pUser.className = 'boxp'
+    pUser.innerHTML = `<span class="boxp-label">Username:</span> `
+    const userSpan = document.createElement('span')
+    userSpan.textContent = password.username || ''
+    pUser.appendChild(userSpan)
+    box.appendChild(pUser)
+
+    // password (masked)
+    const pPwd = document.createElement('p')
+    pPwd.className = 'boxp'
+    pPwd.innerHTML = `<span class="boxp-label">Password:</span> `
+    const masked = document.createElement('span')
+    masked.className = 'masked'
+    masked.textContent = '••••••••'
+    const revealBtn = document.createElement('button')
+    revealBtn.className = 'small-btn'
+    revealBtn.textContent = 'Reveal'
+    revealBtn.onclick = (e) => revealPassword(password._id, revealBtn)
+    pPwd.appendChild(masked); pPwd.appendChild(document.createTextNode(' ')); pPwd.appendChild(revealBtn)
+    box.appendChild(pPwd)
+
+    // category
+    const cat = document.createElement('div')
+    cat.className = 'box-category'
+    cat.textContent = password.category || 'General'
+    box.appendChild(cat)
+
+    // notes
+    if (password.notes) {
+        const notes = document.createElement('div')
+        notes.className = 'box-notes'
+        notes.textContent = '📝 ' + password.notes
+        box.appendChild(notes)
+    }
+
     return box
 }
 
@@ -474,7 +564,7 @@ function revealPassword(passwordId, btn) {
     if (!box) return
     const masked = box.querySelector('.masked')
     if (!masked) return
-    const pwd = box.getAttribute('data-password')
+        const pwd = passwordsCache[passwordId] || ''
     if (masked.textContent.includes('•')) {
         masked.textContent = pwd
         btn.textContent = 'Hide'
@@ -584,11 +674,11 @@ async function editPassword(passwordId) {
     // Populate form with existing password details stored on the box
     const box = document.querySelector(`[data-password-id="${passwordId}"]`)
     if (!box) return
-    const title = box.getAttribute('data-title')
-    const username = box.getAttribute('data-username')
-    const password = box.getAttribute('data-password')
-    const category = box.getAttribute('data-category')
-    const notes = box.getAttribute('data-notes')
+    const title = box.querySelector('.boxTitle')?.textContent || ''
+    const username = box.querySelector('.boxp')?.querySelector('span:nth-of-type(2)')?.textContent || ''
+    const password = passwordsCache[passwordId] || ''
+    const category = box.querySelector('.box-category')?.textContent || 'General'
+    const notes = box.querySelector('.box-notes')?.textContent?.replace(/^📝\s*/, '') || ''
 
     document.getElementById("passwordTitle").value = title
     document.getElementById("passwordUsername").value = username
@@ -638,11 +728,11 @@ async function deletePassword(passwordId) {
         // backup from DOM if possible
         const box = document.querySelector(`[data-password-id="${passwordId}"]`)
         const backup = box ? {
-            title: box.getAttribute('data-title'),
-            username: box.getAttribute('data-username'),
-            password: box.getAttribute('data-password'),
-            category: box.getAttribute('data-category'),
-            notes: box.getAttribute('data-notes')
+            title: box.querySelector('.boxTitle')?.textContent || '',
+            username: box.querySelector('.boxp')?.querySelector('span:nth-of-type(2)')?.textContent || box.querySelector('.boxp')?.textContent || '',
+            password: passwordsCache[passwordId] || '',
+            category: box.querySelector('.box-category')?.textContent || '',
+            notes: box.querySelector('.box-notes')?.textContent?.replace(/^📝\s*/, '') || ''
         } : null
 
         lastDeletedPassword = { id: passwordId, bankId: currentBank._id, data: backup }
@@ -756,7 +846,7 @@ async function updateSettingsScreen() {
             data.banks.forEach(bank => {
                 const bankDiv = document.createElement('div')
                 bankDiv.style.padding = '8px 0'
-                bankDiv.innerHTML = `• ${bank.name}`
+                bankDiv.textContent = `• ${bank.name || ''}`
                 banksList.appendChild(bankDiv)
             })
         } else {
@@ -767,6 +857,52 @@ async function updateSettingsScreen() {
         banksList.innerHTML = '<div style="color:rgb(150,150,150)">Unable to load banks</div>'
     }
 }
+
+// Modal show/hide helpers for settings
+function showEditProfileModal(){
+    const m = document.getElementById('editProfileModal')
+    if (m) m.style.display = 'flex'
+    // populate current user
+    fetch(`${API_BASE}/auth/me`, { headers: { 'Authorization': `Bearer ${authToken}` } }).then(r=>r.json()).then(res=>{
+        const u = res.user || res
+        if (!u) return
+        const nameEl = document.getElementById('settingsUsernameInput')
+        const emailEl = document.getElementById('settingsEmailInput')
+        if (nameEl) nameEl.value = u.username || ''
+        if (emailEl) emailEl.value = u.email || ''
+    }).catch(()=>{})
+}
+function hideEditProfileModal(){ const m = document.getElementById('editProfileModal'); if (m) m.style.display = 'none' }
+function showChangePasswordModal(){ const m = document.getElementById('changePasswordModal'); if (m) m.style.display = 'flex' }
+function hideChangePasswordModal(){ const m = document.getElementById('changePasswordModal'); if (m) m.style.display = 'none' }
+function showThemeModal(){ const m = document.getElementById('themeModal'); if (m) m.style.display = 'flex' }
+function hideThemeModal(){ const m = document.getElementById('themeModal'); if (m) m.style.display = 'none' }
+
+// Theme picker logic
+const themes = ['default','dark','sunset','forest','rose','ocean','midnight','gold','mint','berry','steel','slate']
+let selectedTheme = 'default'
+function buildThemeGrid(){
+    const grid = document.getElementById('themeGrid'); if (!grid) return
+    grid.innerHTML = ''
+    themes.forEach(t=>{
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.className = 'theme-tile theme-'+t
+        btn.textContent = t.charAt(0).toUpperCase() + t.slice(1)
+        btn.onclick = ()=>{ document.querySelectorAll('.theme-tile').forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); selectedTheme = t; applyTheme(t) }
+        if (t===selectedTheme) btn.classList.add('selected')
+        grid.appendChild(btn)
+    })
+}
+
+function applyTheme(themeName){
+    try{
+        document.body.classList.remove(...themes.map(t=>'theme-'+t))
+        document.body.classList.add('theme-'+themeName)
+    }catch(e){}
+}
+
+// save theme button handler is attached after DOMContentLoaded so the element exists
 
 // ========== Bank Members Management ==========
 async function loadBankMembers() {
@@ -783,12 +919,13 @@ async function loadBankMembers() {
 
         data.bank.members.forEach(member => {
             const row = document.createElement("tr")
-            row.innerHTML = `
-                <td>${member.userId.username}</td>
-                <td>${member.userId.email}</td>
-                <td>${member.roleId.name}</td>
-                <td><button class="role-action-btn">Change Role</button></td>
-            `
+            const tdUser = document.createElement('td'); tdUser.textContent = member.userId.username || ''
+            const tdEmail = document.createElement('td'); tdEmail.textContent = member.userId.email || ''
+            const tdRole = document.createElement('td'); tdRole.textContent = member.roleId.name || ''
+            const tdAction = document.createElement('td');
+            const btn = document.createElement('button'); btn.className = 'role-action-btn'; btn.type='button'; btn.textContent = 'Change Role'
+            tdAction.appendChild(btn)
+            row.appendChild(tdUser); row.appendChild(tdEmail); row.appendChild(tdRole); row.appendChild(tdAction)
             tbody.appendChild(row)
         })
 
@@ -866,20 +1003,20 @@ async function loadRolesAndPermissions() {
 
         data.roles.forEach(role => {
             rolesCache[role._id] = role
-            const row = document.createElement("tr")
-            row.innerHTML = `
-                <td>${role.name}</td>
-                <td><input type="checkbox" class="permission-checkbox" ${role.permissions.canViewPasswords ? "checked" : ""} disabled></td>
-                <td><input type="checkbox" class="permission-checkbox" ${role.permissions.canAddPasswords ? "checked" : ""} disabled></td>
-                <td><input type="checkbox" class="permission-checkbox" ${role.permissions.canEditPasswords ? "checked" : ""} disabled></td>
-                <td><input type="checkbox" class="permission-checkbox" ${role.permissions.canDeletePasswords ? "checked" : ""} disabled></td>
-                <td><input type="checkbox" class="permission-checkbox" ${role.permissions.canManageUsers ? "checked" : ""} disabled></td>
-                <td><input type="checkbox" class="permission-checkbox" ${role.permissions.canManageSettings ? "checked" : ""} disabled></td>
-                <td style="white-space:nowrap;">
-                    <button class="small-btn" onclick="editRole('${role._id}')">Edit</button>
-                    <button class="small-btn danger" onclick="deleteRole('${role._id}')">Delete</button>
-                </td>
-            `
+            const row = document.createElement('tr')
+            const tdName = document.createElement('td'); tdName.textContent = role.name || ''
+            const mkCheckboxCell = (checked) => { const td = document.createElement('td'); const inp = document.createElement('input'); inp.type='checkbox'; inp.className='permission-checkbox'; inp.checked = !!checked; inp.disabled = true; td.appendChild(inp); return td }
+            const tdView = mkCheckboxCell(role.permissions.canViewPasswords)
+            const tdAdd = mkCheckboxCell(role.permissions.canAddPasswords)
+            const tdEdit = mkCheckboxCell(role.permissions.canEditPasswords)
+            const tdDelete = mkCheckboxCell(role.permissions.canDeletePasswords)
+            const tdManageUsers = mkCheckboxCell(role.permissions.canManageUsers)
+            const tdManageSettings = mkCheckboxCell(role.permissions.canManageSettings)
+            const tdActions = document.createElement('td'); tdActions.style.whiteSpace = 'nowrap'
+            const btnEdit = document.createElement('button'); btnEdit.className='small-btn'; btnEdit.type='button'; btnEdit.textContent='Edit'; btnEdit.onclick = () => editRole(role._id)
+            const btnDel = document.createElement('button'); btnDel.className='small-btn danger'; btnDel.type='button'; btnDel.textContent='Delete'; btnDel.onclick = () => deleteRole(role._id)
+            tdActions.appendChild(btnEdit); tdActions.appendChild(btnDel)
+            row.appendChild(tdName); row.appendChild(tdView); row.appendChild(tdAdd); row.appendChild(tdEdit); row.appendChild(tdDelete); row.appendChild(tdManageUsers); row.appendChild(tdManageSettings); row.appendChild(tdActions)
             tbody.appendChild(row)
         })
     } catch (error) {

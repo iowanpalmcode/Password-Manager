@@ -215,44 +215,10 @@
                 <span class="settings-label">Member Since</span>
                 <span class="settings-value" id="settingsMemberSince"></span>
             </div>
-            <div style="margin-top:18px;">
-                <form id="accountSettingsForm">
-                    <div class="form-group">
-                        <label for="settingsUsernameInput">Username</label>
-                        <input type="text" id="settingsUsernameInput">
-                    </div>
-                    <div class="form-group">
-                        <label for="settingsEmailInput">Email</label>
-                        <input type="email" id="settingsEmailInput">
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="settingsThemeToggle"> Dark theme (placeholder)</label>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="form-btn form-btn-submit">Save Account</button>
-                        <button type="button" class="form-btn form-btn-cancel" onclick="loadCurrentUser()">Reset</button>
-                    </div>
-                </form>
-
-                <hr style="margin:18px 0">
-
-                <form id="changePasswordForm">
-                    <div class="form-group">
-                        <label for="settingsCurrentPassword">Current Password</label>
-                        <input type="password" id="settingsCurrentPassword">
-                    </div>
-                    <div class="form-group">
-                        <label for="settingsNewPassword">New Password</label>
-                        <input type="password" id="settingsNewPassword">
-                    </div>
-                    <div class="form-group">
-                        <label for="settingsNewPasswordConfirm">Confirm New Password</label>
-                        <input type="password" id="settingsNewPasswordConfirm">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="form-btn form-btn-submit">Change Password</button>
-                    </div>
-                </form>
+            <div style="margin-top:18px; display:flex; gap:12px; align-items:center;">
+                <button class="form-btn form-btn-submit" onclick="showEditProfileModal()">Edit Profile</button>
+                <button class="form-btn" onclick="showChangePasswordModal()">Change Password</button>
+                <button class="form-btn" onclick="showThemeModal()">Choose Theme</button>
             </div>
         </div>
 
@@ -262,7 +228,7 @@
         </div>
         <div class="settings-section">
             <h3>About</h3>
-            <p class="info-text">Made by Felix and Joseph in about a week. Javascript, HTML, and CSS; 1 week project given to us by oru IT Teacher, Mr.Carter.</p>
+            <p class="info-text">Made by Felix and Joseph in about a week. Javascript, HTML, and CSS; 1 week project given to us by our Information Technology Teacher, Mr.Carter.</p>
         </div>
     </div>
 
@@ -425,6 +391,64 @@
     <div id="snackbar" class="snackbar" style="display:none;">
         <span id="snackbarMessage"></span>
         <button id="snackbarUndo" class="small-btn">Undo</button>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <h2>Edit Profile</h2>
+            <form id="accountSettingsForm">
+                <div class="form-group">
+                    <label for="settingsUsernameInput">Username</label>
+                    <input type="text" id="settingsUsernameInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="settingsEmailInput">Email</label>
+                    <input type="email" id="settingsEmailInput" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="form-btn form-btn-submit">Save</button>
+                    <button type="button" class="form-btn form-btn-cancel" onclick="hideEditProfileModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <h2>Change Password</h2>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="settingsCurrentPassword">Current Password</label>
+                    <input type="password" id="settingsCurrentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="settingsNewPassword">New Password</label>
+                    <input type="password" id="settingsNewPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="settingsNewPasswordConfirm">Confirm New Password</label>
+                    <input type="password" id="settingsNewPasswordConfirm" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="form-btn form-btn-submit">Change</button>
+                    <button type="button" class="form-btn form-btn-cancel" onclick="hideChangePasswordModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div class="modal" id="themeModal">
+        <div class="modal-content">
+            <h2>Choose Theme</h2>
+            <div id="themeGrid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:12px;"></div>
+            <div style="margin-top:14px; display:flex; gap:10px;">
+                <button class="form-btn form-btn-submit" id="saveThemeBtn">Save Theme</button>
+                <button class="form-btn form-btn-cancel" onclick="hideThemeModal()">Cancel</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>
