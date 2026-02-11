@@ -890,7 +890,7 @@ const themeDefinitions = {
     rose: { '--bg': '#fff1f2', '--accent': '#fb7185', '--text': '#3b1323' },
     ocean: { '--bg': '#f0f9ff', '--accent': '#0ea5e9', '--text': '#022f40' },
     midnight: { '--bg': '#071329', '--accent': '#7c3aed', '--text': '#e6f0ff' },
-    gold: { '--bg': '#fffaf0', '--accent': '#b45309', '--text': '#2b1600' },
+    gold: { '--bg': '#fffaf0', '--accent': '#d3d30b', '--text': '#2b1600' },
     mint: { '--bg': '#fbfffd', '--accent': '#10b981', '--text': '#05361a' },
     berry: { '--bg': '#fff5fb', '--accent': '#a21caf', '--text': '#2b0b2e' },
     steel: { '--bg': '#f7f9fc', '--accent': '#475569', '--text': '#0f1720' },
