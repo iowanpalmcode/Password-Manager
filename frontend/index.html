@@ -3,43 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Manager</title>
+    <title>Passbank - Secure Team Password Manager</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h2 onclick="formToggle()"class="addPassword">Add Password</h2>
-        <h1 class="title">Password Manager</h1>
-        <div class="help">?</div>
+    <!-- ========== AUTH SCREEN ========== -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box" id="authBox">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="font-size: 2.5em; color: rgb(220,16,16); margin: 0;">🔐 Passbank</h1>
+                <p style="color: #666; margin: 5px 0 0 0;">Team Password Manager</p>
+            </div>
+            <h1 id="authTitle">Login</h1>
+            <p id="authSubtitle">Manage your passwords securely with your team</p>
+            <div class="error-message" id="authError"></div>
+            
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="auth-btn">Login</button>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="registerPasswordConfirm" required>
+                </div>
+                <button type="submit" class="auth-btn">Register</button>
+            </form>
+
+            <div class="toggle-auth">
+                <span id="toggleText">Don't have an account?</span>
+                <a id="toggleAuthLink">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== WELCOME SCREEN ========== -->
+    <div class="welcome-container" id="welcomeContainer">
+        <div class="welcome-box">
+            <h1>🔐 Welcome to Passbank</h1>
+            <p>Secure team password management</p>
+            <button class="welcome-btn" onclick="goToBanks()">Go to Banks</button>
+        </div>
+    </div>
+
+    <!-- ========== HEADER ========== -->
+    <header id="header">
+        <h1 class="title">🔐 Passbank</h1>
+        <div class="header-right">
+            <h2 class="addPassword" id="addPasswordBtn" onclick="formToggle()" style="display: none;">+ Add Password</h2>
+            <div class="help" id="help">?</div>
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar"></div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item" onclick="goToBanks()">Banks</div>
+                    <div class="dropdown-item" onclick="goToSettings()">Settings</div>
+                    <div class="dropdown-item logout" onclick="logout()">Logout</div>
+                </div>
+            </div>
+        </div>
     </header>
-    <p style="display: none;" class="helpDesc">Put passwords here to manage them easier</p>
-    <main>
-        <div class="section1">
+
+    <p class="helpDesc" id="helpDesc">Click on a password card to view or edit details</p>
+
+    <!-- ========== BANKS SCREEN ========== -->
+    <div class="main-container" id="mainContainer">
+        <div class="banks-header">
+            <h2>Your Banks</h2>
+            <p>Select a bank to manage passwords</p>
+        </div>
+        <button class="create-bank-btn" onclick="showCreateBankForm()">+ Create New Bank</button>
+        <div class="banks-grid" id="banksGrid"></div>
+    </div>
+
+    <!-- ========== PASSWORD MANAGEMENT SCREEN ========== -->
+    <div class="bank-container" id="bankContainer">
+        <button class="back-btn" onclick="goToBanks()">← Back to Banks</button>
+        
+        <div class="bank-title-section">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div class="bank-icon" id="bankIcon">🏦</div>
+                <h2 id="bankName"></h2>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="small-btn" id="clearPasswordsBtn" onclick="clearBankPasswords()" style="display:none;">Clear Passwords</button>
+                <button class="small-btn danger" id="deleteBankBtn" onclick="deleteCurrentBank()" style="display:none;">Delete Bank</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('passwords')">Passwords</button>
+            <button class="tab" onclick="switchTab('members')">Members</button>
+            <button class="tab" onclick="switchTab('settings')">Settings</button>
+        </div>
+
+        <!-- Passwords Tab -->
+        <div id="passwordsTab" class="tab-content active">
             <div class="searchCont">
-                <h2 class="searchTitle">Search</h2>
-                <input class="searchInput" placeholder="Search Passwords">
+                <h2 class="searchTitle">Your Passwords</h2>
+                <div class="search-box">
+                    <input class="searchInput" id="searchInput" placeholder="Search passwords...">
+                    <select class="category-filter" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="General">General</option>
+                        <option value="Banking">Banking</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Email">Email</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
             </div>
-            <p class="noPasswordsError"style="text-align: center; margin-left: 20vw; margin-right: 20vw; font-size: 1.5em;">You currently have no passwords, Click "add passwords" in the top left corner to add a password </p>
-            <div class="boxes">
+            <p class="noPasswordsError" id="noPasswordsError" style="text-align: center; margin-left: 20vw; margin-right: 20vw; font-size: 1.2em;">You currently have no passwords. Click "+ Add Password" to create one.</p>
+            <div class="boxes" id="passwordsBoxes"></div>
+        </div>
+
+        <!-- Members Tab -->
+        <div id="membersTab" class="tab-content" style="display: none;">
+            <div class="settings-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Bank Members</h3>
+                    <button class="add-member-btn" onclick="showAddMemberForm()">+ Add Member</button>
+                </div>
+                <table class="roles-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                    </tbody>
+                </table>
             </div>
         </div>
 
-
-
-        <div style="display: none;"class="formToAddPassword">
-            <div onclick="formToggle()" class="X" style="top: 80px;cursor: pointer; position: fixed; right: 15vw; font-size: 3em;font-family: arial;">X</div>
-            <div id="formcom" class="formTitle"><p style="font-size: 2em;"><b>Title: </b></p><input class="titlef" placeholder="Add Title"></div>
-            <div id="formcom" class="formUsername"><p style="font-size: 2em;"><b>Username: </b></p><input class="usernamef" placeholder="Add Username"></div>
-            <div id="formcom" class="formPassword"><p style="font-size: 2em;"><b>Password: </b></p><input class="passwordf" placeholder="Add Password"></div>
-            <button onclick="addPasswordSubmit()">Add Password</button>
-            <p class="errorAddingPassword"style="display: none;">Error adding password</p>
+        <!-- Settings Tab -->
+        <div id="settingsTab" class="tab-content" style="display: none;">
+            <div class="settings-section">
+                <h3>Manage Roles & Permissions</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div></div>
+                    <button class="small-btn" onclick="showAddRoleForm()">+ Add Role</button>
+                </div>
+                <table class="roles-table">
+                    <thead>
+                        <tr>
+                            <th>Role Name</th>
+                            <th>View Passwords</th>
+                            <th>Add Passwords</th>
+                            <th>Edit Passwords</th>
+                            <th>Delete Passwords</th>
+                            <th>Manage Users</th>
+                            <th>Settings</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rolesTableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </main>
-    <footer>
+    </div>
 
-    </footer>
+    <!-- ========== SETTINGS SCREEN ========== -->
+    <div class="settings-container" id="settingsContainer">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 class="settings-title">Settings</h1>
+            <button class="back-btn" onclick="goToBanks()">← Back</button>
+        </div>
 
+        <div class="settings-section">
+            <h3>Account Information</h3>
+            <div class="settings-row">
+                <span class="settings-label">Username</span>
+                <span class="settings-value" id="settingsUsername"></span>
+            </div>
+            <div class="settings-row">
+                <span class="settings-label">Email</span>
+                <span class="settings-value" id="settingsEmail"></span>
+            </div>
+            <div class="settings-row">
+                <span class="settings-label">Member Since</span>
+                <span class="settings-value" id="settingsMemberSince"></span>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>Your Banks</h3>
+            <div id="userBanksList"></div>
+        </div>
+    </div>
+
+    <!-- ========== CREATE BANK MODAL ========== -->
+    <div class="modal" id="createBankModal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Create New Bank</h2>
+                <button type="button" class="modal-close" onclick="hideCreateBankForm()">&times;</button>
+            </div>
+            <form id="createBankForm">
+                <div class="form-group">
+                    <label for="bankNameInput">Bank Name</label>
+                    <input type="text" id="bankNameInput" placeholder="e.g., Work Accounts" required>
+                </div>
+                <div class="form-group">
+                    <label for="bankDescription">Description (Optional)</label>
+                    <input type="text" id="bankDescription" placeholder="e.g., All work-related passwords">
+                </div>
+                <div class="form-group">
+                    <label for="bankIconInput">Icon (Optional)</label>
+                    <input type="text" id="bankIconInput" placeholder="e.g., 💼" maxlength="2">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="form-btn form-btn-submit">Create Bank</button>
+                    <button type="button" class="form-btn form-btn-cancel" onclick="hideCreateBankForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== FORM MODAL ========== -->
+    <div class="formToAddPassword" id="formToAddPassword">
+        <div class="form-content">
+            <button type="button" class="form-close-btn" onclick="formToggle()">×</button>
+            <h2 class="form-title" id="formTitle">Add Password</h2>
+            
+            <div class="errorAddingPassword" id="errorAddingPassword"></div>
+
+            <form id="passwordForm">
+                <div class="form-group-password">
+                    <label for="formTitle">Title</label>
+                    <input type="text" id="passwordTitle" placeholder="e.g., Gmail, Bank Account" required>
+                </div>
+
+                <div class="form-group-password">
+                    <label for="formUsername">Username/Email</label>
+                    <input type="text" id="passwordUsername" placeholder="Enter username or email" required>
+                </div>
+
+                <div class="form-group-password">
+                    <label for="formPassword">Password</label>
+                    <input type="password" id="passwordPassword" placeholder="Enter password" required>
+                    <div style="margin-top:8px; font-size:0.9em; color:#555; display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="passwordShowToggle">
+                        <label for="passwordShowToggle">Show password</label>
+                        <div style="display:flex; align-items:center; gap:10px; margin-left:auto;">
+                            <span id="passwordStrength" style="color:#777; font-size:0.9em; min-width:56px;"></span>
+                            <div class="strength-meter" style="width:120px; height:8px; background:#eee; border-radius:6px; overflow:hidden;">
+                                <div id="passwordStrengthBar" class="strength-bar" style="width:0%; height:100%; background:#ddd;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-password">
+                    <label for="formCategory">Category</label>
+                    <select id="passwordCategory">
+                        <option value="General">General</option>
+                        <option value="Banking">Banking</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Email">Email</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group-password">
+                    <label for="formNotes">Notes (Optional)</label>
+                    <textarea id="passwordNotes" placeholder="Add any additional notes..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="form-btn form-btn-submit">Save Password</button>
+                    <button type="button" class="form-btn form-btn-cancel" onclick="formToggle()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== ADD MEMBER MODAL ========== -->
+    <div class="modal" id="addMemberModal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Add Member to Bank</h2>
+                <button type="button" class="modal-close" onclick="hideAddMemberForm()">&times;</button>
+            </div>
+            <form id="addMemberForm" onsubmit="handleAddMember(event)">
+                <div class="form-group">
+                    <label for="memberEmail">Member Email</label>
+                    <input type="email" id="memberEmail" placeholder="Enter member's email" required>
+                </div>
+                <div class="form-group">
+                    <label for="memberRole">Role</label>
+                    <select id="memberRole" required>
+                        <option value="">Select a role...</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="form-btn form-btn-submit">Add Member</button>
+                    <button type="button" class="form-btn form-btn-cancel" onclick="hideAddMemberForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== ADD / EDIT ROLE MODAL ========== -->
+    <div class="modal" id="addRoleModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 id="roleModalTitle">Add Role</h2>
+                <button type="button" class="modal-close" onclick="hideAddRoleForm()">&times;</button>
+            </div>
+            <form id="addRoleForm">
+                <input type="hidden" id="roleIdInput">
+                <div class="form-group">
+                    <label for="roleNameInput">Role Name</label>
+                    <input type="text" id="roleNameInput" placeholder="e.g., Owner, Member" required>
+                </div>
+                <div class="form-group">
+                    <label>Permissions</label>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <label><input type="checkbox" id="permView"> View Passwords</label>
+                        <label><input type="checkbox" id="permAdd"> Add Passwords</label>
+                        <label><input type="checkbox" id="permEdit"> Edit Passwords</label>
+                        <label><input type="checkbox" id="permDelete"> Delete Passwords</label>
+                        <label><input type="checkbox" id="permManageUsers"> Manage Users</label>
+                        <label><input type="checkbox" id="permManageSettings"> Manage Settings</label>
+                    </div>
+                </div>
+                <div class="form-actions" style="margin-top:12px;">
+                    <button type="submit" class="form-btn form-btn-submit">Save Role</button>
+                    <button type="button" class="form-btn form-btn-cancel" onclick="hideAddRoleForm()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="script.js"></script>
+    <!-- Snackbar for undo actions -->
+    <div id="snackbar" class="snackbar" style="display:none;">
+        <span id="snackbarMessage"></span>
+        <button id="snackbarUndo" class="small-btn">Undo</button>
+    </div>
 </body>
 </html>
